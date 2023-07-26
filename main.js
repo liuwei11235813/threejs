@@ -24,6 +24,9 @@ scene.add(light)
 
 
 
+
+
+
 function animate() {
     requestAnimationFrame(animate)
 
