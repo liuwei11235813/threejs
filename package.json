@@ -3,11 +3,12 @@
     "three": "^0.154.0"
   },
   "devDependencies": {
+    "lil-gui": "^0.18.2",
     "vite": "^4.4.6"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"// locally preview production build
+    "preview": "vite preview"
   }
 }
