@@ -47,12 +47,16 @@ const progressBarElem = loadingElem.querySelector('.progressbar')
 
 
 loadManager.onLoad = () => {
-
+    loadingElem.style.display = 'none';
     const cube = new THREE.Mesh(geometry, materials)
     scene.add(cube)
     cubes.push(cube)
 }
 
+loadManager.onProgress = (urlOfLastItemLoaded, itemsLoaded, itemsTotal) => {
+    const progress = itemsLoaded / itemsTotal
+    progressBarElem.style.transform = `scaleX(${progress})`
+}
 
 
 
