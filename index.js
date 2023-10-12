@@ -42,7 +42,7 @@ cube.position.set(3.5, .5, .5)
 
 let points = [];
 points.push( new THREE.Vector3( 0, 1, 0 ) );
-points.push( new THREE.Vector3( 8, 1, 0 ) );
+points.push( new THREE.Vector3( 1, 1, 2.5 ) );
 
 let geometry = new THREE.BufferGeometry().setFromPoints( points );
 let material = new THREE.LineBasicMaterial({
@@ -64,6 +64,7 @@ ray2.subVectors(new THREE.Vector3(2, 1, 1), new THREE.Vector3(0, 1, 3)).normaliz
 console.log(ray2);
 
 const raycaster = new THREE.Raycaster(new THREE.Vector3(0, 1, 3), ray2);
+raycaster.params.Line.threshold = 0.05 ;
 const intersects = raycaster.intersectObject( line )
 console.log(intersects);
 
