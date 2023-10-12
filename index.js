@@ -33,40 +33,42 @@ controls.update()
 
 
 // 创建一个立方体
-const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
 const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-// 创建一个无限长的直线
-const lineGeometry = new THREE.BufferGeometry();
-const positions = new Float32Array(2 * 3); // 2个点 * 3个坐标（x, y, z）
-
-// 设置直线的起点和终点，以使它穿过立方体的中心
-const startPoint = new THREE.Vector3(-1, 0, 0);
-const endPoint = new THREE.Vector3(1, 0, 0);
-
-positions[0] = startPoint.x;
-positions[1] = startPoint.y;
-positions[2] = startPoint.z;
-
-positions[3] = endPoint.x;
-positions[4] = endPoint.y;
-positions[5] = endPoint.z;
-
-lineGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-const line = new THREE.Line(lineGeometry, lineMaterial);
-
-// 将立方体和直线添加到场景
-scene.add(cube);
-scene.add(line);
+cube.position.set(3.5, .5, .5)
 
 
+let points = [];
+points.push( new THREE.Vector3( 0, 1, 0 ) );
+points.push( new THREE.Vector3( 8, 1, 0 ) );
+
+let geometry = new THREE.BufferGeometry().setFromPoints( points );
+let material = new THREE.LineBasicMaterial({
+    color:0xff0000
+});
+const line = new THREE.Line(geometry, material)
+scene.add(line)
 
 
+const pointer1 = cube.localToWorld(new THREE.Vector3(0.5, 0.5, 0.5))
+console.log(pointer1);
 // 将网格对象添加到场景
-// scene.add(cube);
+scene.add(cube);
+
+
+const ray1 = new THREE.Ray(new THREE.Vector3(0,1,0),  new THREE.Vector3(1,1,0))
+const ray2 = new THREE.Vector3()
+ray2.subVectors(new THREE.Vector3(2, 1, 1), new THREE.Vector3(0, 1, 3)).normalize()
+console.log(ray2);
+
+const raycaster = new THREE.Raycaster(new THREE.Vector3(0, 1, 3), ray2);
+const intersects = raycaster.intersectObject( line )
+console.log(intersects);
+
+
+
 
 
 
