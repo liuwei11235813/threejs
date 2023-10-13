@@ -58,7 +58,7 @@ console.log(pointer1);
 scene.add(cube);
 
 
-const ray1 = new THREE.Ray(new THREE.Vector3(0,1,0),  new THREE.Vector3(1,1,0))
+
 const ray2 = new THREE.Vector3()
 ray2.subVectors(new THREE.Vector3(2, 1, 1), new THREE.Vector3(0, 1, 3)).normalize()
 console.log(ray2);
