@@ -99,6 +99,9 @@ scene.add(bottom);
 scene.add(left);
 scene.add(right);
 
+console.log(front);
+
+
 // 创建一个渲染循环
 function animate() {
     requestAnimationFrame(animate);
