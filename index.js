@@ -26,13 +26,13 @@ const controls = new OrbitControls(camera, renderer.domElement )
 controls.update()
 
 
-const cubeGeometry = new THREE.BoxGeometry(1,1,1)
+const cubeGeometry = new THREE.BoxGeometry(5,4,2)
 const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00})
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 scene.add(cube)
 cube.position.set(10,0, 0)
 
-// console.log(cube);
+console.log('cube=========', cube);
 
 
 
@@ -62,8 +62,9 @@ const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
 const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh)
+mesh.rotateX(Math.PI/2)
 
-console.log(mesh);
+// console.log(mesh);
 
 const verticesOriginArray = mesh.geometry.attributes.position.array
 const verticesArrayT = []
@@ -95,39 +96,51 @@ verticesArray.forEach((item) => {
 })
 
 
-function calcArea(mesh) {
-    const verticesOriginArray = mesh.geometry.attributes.position.array
-    const verticesArrayT = []
-    for (let index = 0; index < verticesOriginArray.length; index+=3) {
-        verticesArrayT.push(verticesOriginArray.slice(index, index+3))
-    }
-    console.log(verticesArrayT);
+export function calcArea(mesh) {
+    const verticesOriginArray = mesh.geometry.getAttribute('position').array
+    const indexArray = mesh.geometry.index.array
+    const groups = mesh.geometry.groups
+    // console.log(indexArray);
 
+    const faceArray = []
+    groups.forEach((ele) => {
+        const temp = indexArray.slice(ele.start, ele.start+ele.count)
+        const tempArrayBig = []
+        for (let index = 0; index < temp.length; index+=3) {
+            const tempArray = []
+            tempArray.push(temp[index])
+            tempArray.push(temp[index+1])
+            tempArray.push(temp[index+2])
+            tempArrayBig.push(tempArray)
+        }
+        faceArray.push(tempArrayBig)
 
-    verticesArrayT.map((item, index, array) => {
-        array[index] = new THREE.Vector3(item[0], item[1], item[2])
     })
+    //处理顶点
     const verticesArray = []
-    for (let index = 0; index < verticesArrayT.length; index+=3) {
-        verticesArray.push(verticesArrayT.slice(index, index+3))
+    for (let index = 0; index < verticesOriginArray.length; index+=3) {
+        const v = new THREE.Vector3(verticesOriginArray[index], verticesOriginArray[index+1], verticesOriginArray[index+2])
+        verticesArray.push(v)
     }
+  
     console.log(verticesArray);
     let area = 0
-    verticesArray.forEach((item) => {
-        const [v1, v2, v3] = [item[0], item[1], item[2]]
-        const a = v1.distanceTo(v2);
-        const b = v2.distanceTo(v3);
-        const c = v3.distanceTo(v1);
-        console.log('==============',a,b,c);
+    faceArray.forEach((ele) => {
+        let faceArea = 0
+        ele.forEach((_i) => {
+            const [v1, v2, v3] = [verticesArray[_i[0]], verticesArray[_i[1]], verticesArray[_i[2]]]
+            const a = v1.distanceTo(v2);
+            const b = v2.distanceTo(v3);
+            const c = v3.distanceTo(v1);
 
-        const s = (a + b + c) / 2;
-
-        const areaItem = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-        console.log('areaItem',areaItem);
-
-        area += areaItem
+            const s =  math.evaluate(`(${a} + ${b} + ${c}) / 2`) ;
+            const areaTrangle = math.sqrt(math.evaluate(`${s} * (${s} - ${a}) * (${s} - ${b}) * (${s} - ${c})`));
+            faceArea = math.add(areaTrangle, faceArea) 
+        })
+        console.log(faceArea);
+        area += faceArea
     })
-    return area
+    return math.format(area) 
 }
 
 const cubeArea = calcArea(cube)

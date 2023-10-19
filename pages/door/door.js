@@ -1,7 +1,10 @@
 import * as THREE  from 'three'
+import { CSG } from 'three-csg-ts'
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import * as math from 'mathjs'
+
+// import { calcArea } from '../../index.js'
 
 // 创建一个场景
 var scene = new THREE.Scene();
@@ -18,7 +21,7 @@ document.body.appendChild(renderer.domElement);
 
 const axesHelper = new THREE.AxesHelper( 5 );
 scene.add( axesHelper );
-const gridHelper = new THREE.GridHelper( 10, 10 );
+const gridHelper = new THREE.GridHelper( 20, 20 );
 scene.add( gridHelper );
 
 //
@@ -26,117 +29,91 @@ const controls = new OrbitControls(camera, renderer.domElement )
 controls.update()
 
 
-const cubeGeometry = new THREE.BoxGeometry(1,1,1)
+const cubeGeometry = new THREE.BoxGeometry(10,5,1)
 const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00})
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
+cube.position.y = 2.5
+
+const doorGeometry = new THREE.BoxGeometry(3, 2, 2)
+const doorMaterial = new THREE.MeshBasicMaterial({color: 0xff0000})
+const door = new THREE.Mesh(doorGeometry, doorMaterial)
+
+// scene.add(door)
 scene.add(cube)
-cube.position.set(10,0, 0)
+door.position.set(0, 3, 0)
+console.log(cube);
 
-// console.log(cube);
+cube.updateMatrix()
+door.updateMatrix()
 
-
-
-
-const shape = new THREE.Shape();
-const x = -2.5;
-const y = -5;
-shape.moveTo(x + 2.5, y + 2.5);
-shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
-shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
-shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+const subRes = CSG.subtract(cube, door)
+scene.add(subRes)
+subRes.position.set(0, 8, 0)
+console.log(subRes);
 
 
-const extrudeSettings = {
-    steps: 2,  
-    depth: 2,  
-    bevelEnabled: true,  
-    bevelThickness: 1,  
-    bevelSize: 1,  
-    bevelSegments: 2,  
-};
-
-const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-const mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh)
-
-console.log(mesh);
-
-const verticesOriginArray = mesh.geometry.attributes.position.array
-const verticesArrayT = []
-for (let index = 0; index < verticesOriginArray.length; index+=3) {
-    verticesArrayT.push(verticesOriginArray.slice(index, index+3))
-}
-
-verticesArrayT.map((item, index, array) => {
-    array[index] = new THREE.Vector3(item[0], item[1], item[2])
-})
-
-const verticesArray = []
-for (let index = 0; index < verticesArrayT.length; index+=3) {
-    verticesArray.push(verticesArrayT.slice(index, index+3))
-}
-
-let area = 0
-verticesArray.forEach((item) => {
-    const [v1, v2, v3] = [item[0], item[1], item[2]]
-    const a = v1.distanceTo(v2);
-    const b = v2.distanceTo(v3);
-    const c = v3.distanceTo(v1);
-
-    const s = (a + b + c) / 2;
-
-    const areaItem = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-
-    area += areaItem
-})
+console.log('area1', calcArea(cube));
+console.log('area2', calcArea(subRes));
 
 
-function calcArea(mesh) {
-    const verticesOriginArray = mesh.geometry.attributes.position.array
-    const verticesArrayT = []
-    for (let index = 0; index < verticesOriginArray.length; index+=3) {
-        verticesArrayT.push(verticesOriginArray.slice(index, index+3))
-    }
-    console.log(verticesArrayT);
 
 
-    verticesArrayT.map((item, index, array) => {
-        array[index] = new THREE.Vector3(item[0], item[1], item[2])
+export function calcArea(mesh) {
+    const verticesOriginArray = mesh.geometry.getAttribute('position').array
+    const indexArray = mesh.geometry.index.array
+    const groups = mesh.geometry.groups
+    // console.log(indexArray);
+
+    const faceArray = []
+    groups.forEach((ele) => {
+        const temp = indexArray.slice(ele.start, ele.start+ele.count)
+        const tempArrayBig = []
+        for (let index = 0; index < temp.length; index+=3) {
+            const tempArray = []
+            tempArray.push(temp[index])
+            tempArray.push(temp[index+1])
+            tempArray.push(temp[index+2])
+            tempArrayBig.push(tempArray)
+        }
+        faceArray.push(tempArrayBig)
+
     })
+    //处理顶点
     const verticesArray = []
-    for (let index = 0; index < verticesArrayT.length; index+=3) {
-        verticesArray.push(verticesArrayT.slice(index, index+3))
+    for (let index = 0; index < verticesOriginArray.length; index+=3) {
+        const v = new THREE.Vector3(verticesOriginArray[index], verticesOriginArray[index+1], verticesOriginArray[index+2])
+        verticesArray.push(v)
     }
-    console.log(verticesArray);
+  
     let area = 0
-    verticesArray.forEach((item) => {
-        const [v1, v2, v3] = [item[0], item[1], item[2]]
+    // faceArray.forEach((ele) => {
+    //     ele.forEach((_i) => {
+    //         const [v1, v2, v3] = [verticesArray[_i[0]], verticesArray[_i[1]], verticesArray[_i[2]]]
+    //         const a = v1.distanceTo(v2);
+    //         const b = v2.distanceTo(v3);
+    //         const c = v3.distanceTo(v1);
+
+    //         const s =  math.evaluate(`(${a} + ${b} + ${c}) / 2`) ;
+    //         const areaTrangle = math.format(math.sqrt(math.evaluate(`${s} * (${s} - ${a}) * (${s} - ${b}) * (${s} - ${c})`)));
+    //         area = math.add(areaTrangle, area) 
+    //     })
+    // })
+
+    faceArray[4].forEach((_i) => {
+        const [v1, v2, v3] = [verticesArray[_i[0]], verticesArray[_i[1]], verticesArray[_i[2]]]
         const a = v1.distanceTo(v2);
         const b = v2.distanceTo(v3);
         const c = v3.distanceTo(v1);
-        console.log('==============',a,b,c);
 
-        const s = (a + b + c) / 2;
-
-        const areaItem = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-        console.log('areaItem',areaItem);
-
-        area += areaItem
+        const s =  math.evaluate(`(${a} + ${b} + ${c}) / 2`) ;
+        const areaTrangle = math.format(math.sqrt(math.evaluate(`${s} * (${s} - ${a}) * (${s} - ${b}) * (${s} - ${c})`)));
+        area = math.add(areaTrangle, area) 
     })
+
+
+
     return area
 }
-
-const cubeArea = calcArea(cube)
-console.log(cubeArea);
-
-
-
-
-
 
 
 
