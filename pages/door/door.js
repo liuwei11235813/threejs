@@ -38,9 +38,10 @@ const doorGeometry = new THREE.BoxGeometry(3, 2, 2)
 const doorMaterial = new THREE.MeshBasicMaterial({color: 0xff0000})
 const door = new THREE.Mesh(doorGeometry, doorMaterial)
 
-// scene.add(door)
+cube.add(door)
 scene.add(cube)
-door.position.set(0, 3, 0)
+cube.position.set(1, 2.5, 0)
+door.position.set(0, 2.5, 0)
 console.log(cube);
 
 cube.updateMatrix()
