@@ -29,6 +29,10 @@ const controls = new OrbitControls(camera, renderer.domElement )
 controls.update()
 
 
+const material = new THREE.LineBasicMaterial({
+	color: 0xff0000
+});
+
 const cubeGeometry = new THREE.BoxGeometry(10,6,1)
 const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00, wireframe:true, transparent:true})
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
@@ -49,6 +53,7 @@ const cubeEdges = new THREE.LineSegments(cubeEdgesGeometry, edgeMaterial);
 const cube1Edges = new THREE.LineSegments(cube1EdgesGeometry, edgeMaterial);
 //加线框
 cube.add(cubeEdges)
+cube1.translateX(4)
 cube1.add(cube1Edges)
 
 
@@ -149,17 +154,49 @@ const pointsArrayU = pointsArray.filter((el, index, selfArr) => {
 }).filter((el)=>countV(el)==3)    
 console.log('去重后的所有顶点',pointsArrayU);
 
+
+//x轴相同
+const frontP = pointsArrayU.filter(item=>item.z == 0.5)
+let centerX = 0, centerY = 0;
+frontP.forEach(point => {
+    centerX += point.x;
+    centerY += point.y;
+});
+centerX /= frontP.length;
+centerY /= frontP.length;
+frontP.forEach(point => {
+    point.angle = Math.atan2(point.y - centerY, point.x - centerX);
+});
+frontP.sort((a, b) => {
+    if (b.angle - a.angle > 0 && b.x > a.x) {
+        return -1
+    } else {
+        return b.angle - a.angle
+    }
+});
+
+
+const backP = pointsArrayU.filter(item=>item.z==-0.5)
+const frontG = new THREE.BufferGeometry().setFromPoints( frontP )
+const backG = new THREE.BufferGeometry().setFromPoints( backP )
+
+console.log(frontP);
+const frontL = new THREE.LineLoop(frontG, material)
+
+
+subRes.add(frontL)
+frontL.translateZ(3)
+
+
  
 
 
 
 
-const material = new THREE.LineBasicMaterial({
-	color: 0xff0000
-});
+
 const geometry11 = new THREE.BufferGeometry().setFromPoints( pointsArrayU );
-const line11 = new THREE.LineSegments( geometry11, material );
-subRes.add(line11)
+const line11 = new THREE.Line( geometry11, material );
+// subRes.add(line11)
 line11.translateZ(2)
 
 
