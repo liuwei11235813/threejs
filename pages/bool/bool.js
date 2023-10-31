@@ -65,8 +65,6 @@ subRes.translateY(-10)
 //处理顶点
 const geo = subRes.geometry.clone()
 console.log(geo);
-const vGroup = geo.groups
-console.log(vGroup[0]);
 
 
 
@@ -97,20 +95,72 @@ console.log('vInfo', vInfo);
 
 
 const rightV = []
+const leftV = [] 
+const upV = []
+const downV = []
+const forntV = []
+const backV = []
 vInfo.forEach((item)=>{
     if (item.normal.equals(new THREE.Vector3(1, 0, 0))) {
         rightV.push(item.point)
     }
+    if (item.normal.equals(new THREE.Vector3(-1, 0, 0))) {
+        leftV.push(item.point)
+    }
+    if (item.normal.equals(new THREE.Vector3(0, 1, 0))) {
+        upV.push(item.point)
+    }
+    if (item.normal.equals(new THREE.Vector3(0, -1, 0))) {
+        downV.push(item.point)
+    }
+    if (item.normal.equals(new THREE.Vector3(0, 0, 1))) {
+        forntV.push(item.point)
+    }
+    if (item.normal.equals(new THREE.Vector3(0, 0, -1))) {
+        backV.push(item.point)
+    }
 })
 
-console.log('rightVrightVrightV',rightV);
+//vector3是否存在这个数组中
+function vIn(v, array) {
+    const res = array.some(item => item.equals(v))
+    return res
+}
+
+const totalV = [rightV,leftV,upV,downV,forntV,backV]
+const Vertices = []
+const vMap = new Map()
+function countV(v) {
+    let count = 0
+    totalV.forEach(arr => {
+        const isIn = vIn(v, arr)
+        if (isIn) {
+            count++
+        }
+    })
+    return count
+}
+
+
+console.log('attributes position array', pointsArray);
+const pointsArrayU = pointsArray.filter((el, index, selfArr) => {
+    return index == selfArr.findIndex(otherEl => el.equals(otherEl))
+    //用去重后的顶点删选需要的顶点
+}).filter((el)=>countV(el)==3)    
+console.log('去重后的所有顶点',pointsArrayU);
+
+ 
 
 
 
-const pg1 = pointsArray.slice(vGroup[0].start, vGroup[0].count)
-console.log(pg1);
 
-
+const material = new THREE.LineBasicMaterial({
+	color: 0xff0000
+});
+const geometry11 = new THREE.BufferGeometry().setFromPoints( pointsArrayU );
+const line11 = new THREE.LineSegments( geometry11, material );
+subRes.add(line11)
+line11.translateZ(2)
 
 
 
@@ -118,24 +168,18 @@ console.log(pg1);
 
 const pointsGeometry = new THREE.BufferGeometry()
 const edges1 = new THREE.EdgesGeometry(geo);
+const linet = new THREE.LineSegments( edges1, material );
+
+
+
 const pointMaterial = new THREE.PointsMaterial({color:0xff0000, size: .3})
 const pointss = new THREE.Points(edges1, pointMaterial)
 // subRes.add(pointss)
 
 
 
-function drawPoints(points) {
-    const pointMaterial = new THREE.PointsMaterial({color:0xff0000, size: .3})
-    const pointss = new THREE.Points(points, pointMaterial)
-    subRes.add(pointss)
-}
-function drawLine(points) {
-    const geometry = new THREE.BufferGeometry().setFromPoints( points.slice(0,18) );
-    const wireframe1 = new THREE.LineSegments(geometry, edgeMaterial);
-    subRes.add(wireframe1)
-}
-geo.attributes.position.array = geo.attributes.position.array.subarray(0,54)
-geo.attributes.position.count = 18
+
+
 
 
 // drawPoints(geo)
@@ -146,9 +190,7 @@ geo.attributes.position.count = 18
 
 
 
-const material = new THREE.LineBasicMaterial({
-	color: 0xffffff
-});
+
 
 const point1 = new THREE.Vector3( - 10, 0, 0 )
 const point2 = new THREE.Vector3( - 10, 10, 0 )
