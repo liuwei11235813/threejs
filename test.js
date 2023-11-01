@@ -93,13 +93,29 @@ right.position.x = size / 2;
 
 // 将六个面添加到场景中
 scene.add(front);
-scene.add(back);
-scene.add(top);
-scene.add(bottom);
-scene.add(left);
-scene.add(right);
+// scene.add(back);
+// scene.add(top);
+// scene.add(bottom);
+// scene.add(left);
+// scene.add(right);
 
 console.log(front);
+
+const extrudeSettings = {
+	steps: 2,
+	depth: 6,
+	bevelEnabled: true,
+	bevelThickness: 1,
+	bevelSize: 0,
+	bevelOffset: 0,
+	bevelSegments: 1
+};
+const geometry = new THREE.ExtrudeGeometry( frontFace, extrudeSettings );
+const material1 = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true} );
+const mesh = new THREE.Mesh( geometry, material1 ) ;
+scene.add( mesh );
+
+
 
 
 // 创建一个渲染循环

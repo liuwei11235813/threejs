@@ -34,7 +34,7 @@ const material = new THREE.LineBasicMaterial({
 });
 
 const cubeGeometry = new THREE.BoxGeometry(10,6,1)
-const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00, wireframe:true, transparent:true})
+const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00, transparent:true, wireframe:true})
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 scene.add(cube)
 console.log(cube);
@@ -66,6 +66,8 @@ const subRes = CSG.subtract(cube, cube1)
 scene.add(subRes)
 // subRes.material.wireframe = true
 subRes.translateY(-10)
+
+
 
 //处理顶点
 const geo = subRes.geometry.clone()
@@ -154,73 +156,171 @@ const pointsArrayU = pointsArray.filter((el, index, selfArr) => {
 }).filter((el)=>countV(el)==3)    
 console.log('去重后的所有顶点',pointsArrayU);
 
+const pointsUsed = pointsArrayU
+
 
 //x轴相同
 const frontP = pointsArrayU.filter(item=>item.z == 0.5)
-let centerX = 0, centerY = 0;
-frontP.forEach(point => {
-    centerX += point.x;
-    centerY += point.y;
-});
-centerX /= frontP.length;
-centerY /= frontP.length;
-frontP.forEach(point => {
-    point.angle = Math.atan2(point.y - centerY, point.x - centerX);
-});
-frontP.sort((a, b) => {
-    if (b.angle - a.angle > 0 && b.x > a.x) {
-        return -1
-    } else {
-        return b.angle - a.angle
+
+
+const edgesss = new THREE.EdgesGeometry(subRes.geometry);
+console.log('edgessssss', edgesss);
+const linettt = new THREE.LineSegments( edgesss, material );
+// subRes.add(linettt)
+linettt.translateZ(4)
+
+// const lg = linettt.geometry.clone()
+// const lpArray = lg.attributes.position.array
+// // linettt.geometry.attributes.position.array = lpArray.subarray(0,30)
+// // linettt.geometry.attributes.position.count = 10
+
+// const lgVetices = []
+// for (let i = 0; i < lpArray.length; i += 3) {
+//     const v = new THREE.Vector3(lpArray[i], lpArray[i+1], lpArray[i+2])
+//     lgVetices.push(v);
+// }
+// const bigGroups = [];
+// for (let i = 0; i < lgVetices.length; i += 2) {
+//     bigGroups.push(lgVetices.slice(i, i + 2));
+// }
+// // 每组为数组，数组【0】为线段起始点  数组【1】为线段终点
+// console.log(bigGroups);
+
+
+// const usedArray = []
+// bigGroups.forEach((ele) => {
+//     const isIn0 = vIn(ele[0], pointsUsed)
+//     const isIn1 = vIn(ele[1], pointsUsed)
+//     if (isIn0 && isIn1) {
+//         const temp = [ele[0].x,ele[0].y,ele[0].z,ele[1].x,ele[1].y,ele[1].z]
+//         usedArray.push(...temp)
+//     }
+// })
+
+// console.log('usedArray', usedArray);
+// const floatArray = new Float32Array(usedArray);
+// linettt.geometry.attributes.position.array = floatArray
+// linettt.geometry.attributes.position.count = floatArray.length/3
+
+// console.log(linettt);
+
+let validSegments = [];
+
+let validV = []
+let validH = []
+
+// for (let i = 0; i < frontP.length; i++) {
+//     for (let j = i + 1; j < frontP.length; j++) {
+//         if (i === j) continue;
+//         // 检查是否为垂直线段
+//         if (frontP[i].x === frontP[j].x) {
+//             validSegments.push({
+//                 start: frontP[i],
+//                 end: frontP[j],
+//                 direction: 'vertical'
+//             });
+//             validV.push(frontP[i], frontP[j])
+//         }
+//         // 检查是否为水平线段
+//         else if (frontP[i].y === frontP[j].y) {
+//             validSegments.push({
+//                 start: frontP[i],
+//                 end: frontP[j],
+//                 direction: 'horizontal'
+//             });
+//             validH.push(frontP[i], frontP[j])
+//         }
+//     }
+// }
+
+for (let i = 0; i < frontP.length; i++) {
+    let shortestVertical = null;
+    let shortestHorizontal = null;
+    for (let j = i + 1; j < frontP.length; j++) {
+        if (i === j) continue;
+        // 检查是否为垂直线段
+        if (frontP[i].x === frontP[j].x) {
+            if (!shortestVertical || frontP[i].distanceTo(frontP[j]) < frontP[i].distanceTo(shortestVertical)) {
+                shortestVertical = frontP[j];
+            }
+        }
+        // 检查是否为水平线段
+        if (frontP[i].y === frontP[j].y) {
+            if (!shortestHorizontal || frontP[i].distanceTo(frontP[j]) < frontP[i].distanceTo(shortestHorizontal)) {
+                shortestHorizontal = frontP[j];
+            }
+        }
     }
-});
+    if (shortestHorizontal) {
+        validH.push(frontP[i], shortestHorizontal)
+
+        validSegments.push([frontP[i], shortestHorizontal]);
+    }
+    if (shortestVertical) {
+        validV.push(frontP[i], shortestVertical)
+
+        validSegments.push([frontP[i], shortestVertical]);
+    }
+}
+console.log('validSegmentsvalidSegments', validSegments);
+
+console.log('validVvalidV',validV);  // 打印所有有效的线段
 
 
-const backP = pointsArrayU.filter(item=>item.z==-0.5)
-const frontG = new THREE.BufferGeometry().setFromPoints( frontP )
-const backG = new THREE.BufferGeometry().setFromPoints( backP )
+let validZ = [];
+for (let i = 0; i < pointsUsed.length; i++) {
+    for (let j = i + 1; j < pointsUsed.length; j++) {
+        if (pointsUsed[i].x === pointsUsed[j].x && pointsUsed[i].y === pointsUsed[j].y) {
+            validZ.push(pointsUsed[i], pointsUsed[j])
+        }
+    }
+}
 
-console.log(frontP);
-const frontL = new THREE.LineLoop(frontG, material)
-
-
-subRes.add(frontL)
-frontL.translateZ(3)
-
-
- 
+// console.log('validZvalidZ', validZ);
 
 
 
 
 
-const geometry11 = new THREE.BufferGeometry().setFromPoints( pointsArrayU );
-const line11 = new THREE.Line( geometry11, material );
-// subRes.add(line11)
-line11.translateZ(2)
+
+const geometryV = new THREE.BufferGeometry().setFromPoints( validV );
+const line11 = new THREE.LineSegments( geometryV, material );
+subRes.add(line11)
+line11.translateZ(6)
+//
+const line11R = line11.clone()
+// subRes.add(line11R)
+line11R.position.set(0, 0, -1)
+line11R.translateZ(6)
+
+
+const geometryH = new THREE.BufferGeometry().setFromPoints( validH );
+const line22 = new THREE.LineSegments( geometryH, material );
+subRes.add(line22)
+line22.translateZ(6)
+//
+const line22R = line22.clone()
+// subRes.add(line22R)
+line22R.position.set(0, 0, -1)
+line22R.translateZ(6)
+
+
+
+const geometryZ = new THREE.BufferGeometry().setFromPoints( validZ );
+const line33 = new THREE.LineSegments( geometryZ, material );
+// subRes.add(line33)
+line33.translateZ(6)
 
 
 
 
-
-const pointsGeometry = new THREE.BufferGeometry()
-const edges1 = new THREE.EdgesGeometry(geo);
-const linet = new THREE.LineSegments( edges1, material );
 
 
 
 const pointMaterial = new THREE.PointsMaterial({color:0xff0000, size: .3})
-const pointss = new THREE.Points(edges1, pointMaterial)
 // subRes.add(pointss)
 
 
-
-
-
-
-
-// drawPoints(geo)
-// drawLine(pointsArray)
 // 创建线框网格对象
 
 
@@ -252,8 +352,6 @@ const geometry = new THREE.BufferGeometry().setFromPoints( points );
 const line = new THREE.LineSegments( geometry, material );
 line.translateZ(4)
 line.translateY(8)
-scene.add( line );
-
 
 
 
