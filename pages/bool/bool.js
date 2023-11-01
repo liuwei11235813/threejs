@@ -54,6 +54,8 @@ const cube1Edges = new THREE.LineSegments(cube1EdgesGeometry, edgeMaterial);
 //加线框
 cube.add(cubeEdges)
 cube1.translateX(4)
+cube1.translateY(2)
+
 cube1.add(cube1Edges)
 
 
@@ -289,7 +291,7 @@ subRes.add(line11)
 line11.translateZ(6)
 //
 const line11R = line11.clone()
-// subRes.add(line11R)
+subRes.add(line11R)
 line11R.position.set(0, 0, -1)
 line11R.translateZ(6)
 
@@ -300,7 +302,7 @@ subRes.add(line22)
 line22.translateZ(6)
 //
 const line22R = line22.clone()
-// subRes.add(line22R)
+subRes.add(line22R)
 line22R.position.set(0, 0, -1)
 line22R.translateZ(6)
 
@@ -308,7 +310,7 @@ line22R.translateZ(6)
 
 const geometryZ = new THREE.BufferGeometry().setFromPoints( validZ );
 const line33 = new THREE.LineSegments( geometryZ, material );
-// subRes.add(line33)
+subRes.add(line33)
 line33.translateZ(6)
 
 
