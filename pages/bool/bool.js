@@ -43,6 +43,11 @@ const cube1Geometry = new THREE.BoxGeometry(2,2,2)
 const cubeMaterial1 = new THREE.MeshBasicMaterial({color: 0xff0000})
 const cube1 = new THREE.Mesh(cube1Geometry, cubeMaterial1)
 scene.add(cube1)
+
+const cube2Geometry = new THREE.BoxGeometry(3,3,2)
+const cubeMaterial2 = new THREE.MeshBasicMaterial({color: 0xff00ff})
+const cube2 = new THREE.Mesh(cube2Geometry, cubeMaterial2)
+scene.add(cube2)
 // cube1.position.set(5,2,0)
 const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
 
@@ -52,11 +57,9 @@ const cube1EdgesGeometry = new THREE.EdgesGeometry(cube1Geometry);
 const cubeEdges = new THREE.LineSegments(cubeEdgesGeometry, edgeMaterial);
 const cube1Edges = new THREE.LineSegments(cube1EdgesGeometry, edgeMaterial);
 //加线框
-cube.add(cubeEdges)
-cube1.translateX(4)
-cube1.translateY(2)
+cube1.translateX(2)
+// cube1.translateY(0.5)
 
-cube1.add(cube1Edges)
 
 
 cube.updateMatrix()
@@ -65,6 +68,8 @@ cube1.updateMatrix()
 
 
 const subRes = CSG.subtract(cube, cube1)
+// const subRes = CSG.subtract(subRes1, cube2)
+
 scene.add(subRes)
 // subRes.material.wireframe = true
 subRes.translateY(-10)
@@ -171,40 +176,6 @@ const linettt = new THREE.LineSegments( edgesss, material );
 // subRes.add(linettt)
 linettt.translateZ(4)
 
-// const lg = linettt.geometry.clone()
-// const lpArray = lg.attributes.position.array
-// // linettt.geometry.attributes.position.array = lpArray.subarray(0,30)
-// // linettt.geometry.attributes.position.count = 10
-
-// const lgVetices = []
-// for (let i = 0; i < lpArray.length; i += 3) {
-//     const v = new THREE.Vector3(lpArray[i], lpArray[i+1], lpArray[i+2])
-//     lgVetices.push(v);
-// }
-// const bigGroups = [];
-// for (let i = 0; i < lgVetices.length; i += 2) {
-//     bigGroups.push(lgVetices.slice(i, i + 2));
-// }
-// // 每组为数组，数组【0】为线段起始点  数组【1】为线段终点
-// console.log(bigGroups);
-
-
-// const usedArray = []
-// bigGroups.forEach((ele) => {
-//     const isIn0 = vIn(ele[0], pointsUsed)
-//     const isIn1 = vIn(ele[1], pointsUsed)
-//     if (isIn0 && isIn1) {
-//         const temp = [ele[0].x,ele[0].y,ele[0].z,ele[1].x,ele[1].y,ele[1].z]
-//         usedArray.push(...temp)
-//     }
-// })
-
-// console.log('usedArray', usedArray);
-// const floatArray = new Float32Array(usedArray);
-// linettt.geometry.attributes.position.array = floatArray
-// linettt.geometry.attributes.position.count = floatArray.length/3
-
-// console.log(linettt);
 
 let validSegments = [];
 

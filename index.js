@@ -33,6 +33,12 @@ scene.add(cube)
 cube.position.set(10,0, 0)
 
 console.log('cube=========', cube);
+let w = cube.geometry.parameters.width
+console.log(w);
+cubeGeometry.parameters.width = 7
+console.log(w);
+console.log(cubeGeometry.parameters.width);
+
 
 
 
