@@ -30,7 +30,7 @@ controls.update()
 
 
 const cubeGeometry = new THREE.BoxGeometry(10,5,1)
-const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.BackSide})
+const cubeMaterial = new THREE.MeshBasicMaterial({color: 0xcccccc, side: THREE.BackSide})
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 cube.position.y = 2.5
 
@@ -39,7 +39,7 @@ const cube1 = new THREE.Mesh(
     new THREE.BoxGeometry(2, 1, .6),
     new THREE.MeshBasicMaterial({color: 0xffff00})
 )
-cube.add(cube1)
+// cube.add(cube1)
 
 scene.add(cube)
 
