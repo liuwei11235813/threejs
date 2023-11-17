@@ -154,7 +154,27 @@ console.log(cubeArea);
 
 
 
+export function saveScene() {
+    
+    const sceneJSON = JSON.stringify(scene.toJSON());
+    localStorage.setItem('myScene', sceneJSON);
+}
 
+export function loadScene() {
+    // 从 localStorage 读取场景 JSON 字符串
+    const sceneJSON = localStorage.getItem('myScene');
+
+    if (sceneJSON) {
+        // 解析 JSON 字符串
+        const json = JSON.parse(sceneJSON);
+
+        // 使用 ObjectLoader
+        const loader = new THREE.ObjectLoader();
+        const loadedScene = loader.parse(json);
+
+        return loadedScene
+    }
+}
 
 
 

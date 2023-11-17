@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style>
-        *{
-            margin: 0;padding: 0;
+        * {
+            margin: 0;
+            padding: 0;
         }
-        
     </style>
 </head>
 <body>
+    <button id="btn" onclick="">save</button>
 
+    <script type="module" src="/index.js"></script>
+    <script type="module">
+        import { saveScene } from './index.js'
+        document.getElementById('btn').addEventListener('click', saveScene);
+    </script>
 </body>
-     <script type="module" src="/index.js"></script>
 </html>
