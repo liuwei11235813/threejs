@@ -57,8 +57,8 @@ const cube1EdgesGeometry = new THREE.EdgesGeometry(cube1Geometry);
 const cubeEdges = new THREE.LineSegments(cubeEdgesGeometry, edgeMaterial);
 const cube1Edges = new THREE.LineSegments(cube1EdgesGeometry, edgeMaterial);
 //加线框
-cube1.translateX(2)
-// cube1.translateY(0.5)
+cube1.translateX(5)
+cube1.translateY(0)
 
 
 
@@ -182,30 +182,6 @@ let validSegments = [];
 let validV = []
 let validH = []
 
-// for (let i = 0; i < frontP.length; i++) {
-//     for (let j = i + 1; j < frontP.length; j++) {
-//         if (i === j) continue;
-//         // 检查是否为垂直线段
-//         if (frontP[i].x === frontP[j].x) {
-//             validSegments.push({
-//                 start: frontP[i],
-//                 end: frontP[j],
-//                 direction: 'vertical'
-//             });
-//             validV.push(frontP[i], frontP[j])
-//         }
-//         // 检查是否为水平线段
-//         else if (frontP[i].y === frontP[j].y) {
-//             validSegments.push({
-//                 start: frontP[i],
-//                 end: frontP[j],
-//                 direction: 'horizontal'
-//             });
-//             validH.push(frontP[i], frontP[j])
-//         }
-//     }
-// }
-
 for (let i = 0; i < frontP.length; i++) {
     let shortestVertical = null;
     let shortestHorizontal = null;
@@ -262,7 +238,7 @@ subRes.add(line11)
 line11.translateZ(6)
 //
 const line11R = line11.clone()
-subRes.add(line11R)
+// subRes.add(line11R)
 line11R.position.set(0, 0, -1)
 line11R.translateZ(6)
 

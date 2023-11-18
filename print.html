@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <button id="btn">print</button>
+    <!-- <button id="btn">print</button> -->
 </body>
 <script type="module">
 import * as THREE  from 'three'
@@ -48,7 +48,7 @@ controls.update()
 
 
 const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
+    new THREE.BoxGeometry(4,2,1),
     new THREE.MeshBasicMaterial({color: 0xff0000})
 )
 
@@ -62,15 +62,44 @@ scene.add(mesh)
 //     windowForPrint.document.write('<img src="' + dataURL + '"/>');
 
 // })
-const borders = new THREE.EdgesGeometry(mesh.geometry)
-const geometry  = new LineGeometry()
-geometry.fromEdgesGeometry(borders)
-// 创建一个用于描画线段的材质
-const bordersMaterial = new LineMaterial({ color: 0xffff00,linewidth:4 })
-bordersMaterial.resolution.set(window.innerWidth, window.innerHeight)
-const initialWallBorder = new LineSegments2(geometry, bordersMaterial)
 
-mesh.add(initialWallBorder)
+
+
+const borders = new THREE.EdgesGeometry(mesh.geometry)
+console.log('LineSegments', borders);
+const lsMaterial = new THREE.LineBasicMaterial({color:0xffffff})
+const ls = new THREE.LineSegments(borders, lsMaterial)
+
+const lineMaterial = new LineMaterial({
+    color: 0xffff00,
+    linewidth: 4,
+    vertexColors: false
+})
+lineMaterial.resolution.set(window.innerWidth, window.innerHeight);
+
+const vertices = ls.geometry.attributes.position.array
+for (let index = 0; index < vertices.length; index+=6) {
+    const lineGeometry = new LineGeometry()
+  
+    lineGeometry.setPositions([
+        vertices[index], vertices[index+1], vertices[index+2],
+        vertices[index+3], vertices[index+4], vertices[index+5]
+    ])
+    
+    const buildoutline = new LineSegments2(lineGeometry ,lineMaterial);
+    mesh.add(buildoutline)
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
