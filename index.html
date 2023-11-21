@@ -12,11 +12,17 @@
 </head>
 <body>
     <button id="btn" onclick="">save</button>
+    <button id="route" onclick="">route</button>
+    
 
     <script type="module" src="/index.js"></script>
     <script type="module">
         import { saveScene } from './index.js'
+        import { route } from './index.js'
+
         document.getElementById('btn').addEventListener('click', saveScene);
+        document.getElementById('route').addEventListener('click', route);
+
     </script>
 </body>
 </html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    8888
+<script type="module">
+import * as THREE  from 'three'
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import * as math from 'mathjs'
+
+// 创建一个场景
+var scene = new THREE.Scene();
+
+// 创建一个相机
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 10, 10);
+
+// 创建一个渲染器
+var renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+
+const axesHelper = new THREE.AxesHelper( 5 );
+scene.add( axesHelper );
+const gridHelper = new THREE.GridHelper( 10, 10 );
+scene.add( gridHelper );
+
+//
+const controls = new OrbitControls(camera, renderer.domElement )
+controls.update()
+
+
+// 从存储中获取数据
+const cubeDataString = localStorage.getItem('cubeData');
+const cubeData = JSON.parse(cubeDataString);
+
+// 使用 ObjectLoader
+const loader = new THREE.ObjectLoader();
+const cube = loader.parse(cubeData);
+
+// 现在可以将立方体添加到场景中
+scene.add(cube);
+
+
+
+
+
+
+
+
+// 创建一个渲染循环
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update()
+    renderer.render(scene, camera);
+}
+animate();
+
+
+
+
+</script>
+</body>
+</html>

@@ -32,6 +32,12 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
 scene.add(cube)
 cube.position.set(10,0, 0)
 
+
+const edgesGeometry = new THREE.EdgesGeometry(cubeGeometry)
+const edgesMaterial = new THREE.LineBasicMaterial({color: 0xff0000})
+const cubeLine = new THREE.LineSegments(edgesGeometry, edgesMaterial)
+cube.add(cubeLine)
+
 console.log('cube=========', cube);
 let w = cube.geometry.parameters.width
 console.log(w);
@@ -178,7 +184,18 @@ export function loadScene() {
 
 
 
+export function route() {
+    console.log('ropute');
+    window.open('./route.html')
 
+    // 假设 cube 是你想要序列化的 Mesh 对象
+    const cubeData = cube.toJSON();
+    const cubeDataString = JSON.stringify(cubeData);
+
+    localStorage.setItem('cubeData', cubeDataString);
+
+
+}
 
 
 
