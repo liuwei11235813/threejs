@@ -34,11 +34,27 @@ const mesh = new THREE.Mesh(
 scene.add(mesh)
 
 
+const edgesGeometry = new THREE.EdgesGeometry(mesh.geometry)
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+const edges = new THREE.LineSegments(edgesGeometry, lineMaterial);
+mesh.add(edges)
+
 setTimeout(function () {
-    const loadedScene = loadScene()
-    console.log(loadedScene);
-    scene = loadedScene
+    const data = mesh.toJSON()
+
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'output.json';
+    a.click();
+    URL.revokeObjectURL(url);
 },2000)
+
+
+
 
 
 
