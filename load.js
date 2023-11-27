@@ -30,10 +30,20 @@ controls.update()
 
 const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshBasicMaterial({color: 0xff0000})
+    new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: .5})
 )
 
-scene.add(mesh)
+// scene.add(mesh)
+mesh.visible= false
+
+
+const mesh1 = new THREE.Mesh(
+    new THREE.BoxGeometry(.5,.5,.5),
+    new THREE.MeshBasicMaterial({color: 0xffff00})
+)
+mesh.add(mesh1)
+mesh1.userData.isHidden  = true
+mesh1.visible = false
 
 
 // const edgesGeometry = new THREE.EdgesGeometry(mesh.geometry)
@@ -76,7 +86,7 @@ export function saveSceneGLTF() {
     const exporter = new GLTFExporter();
 
     // 导出场景或对象
-    exporter.parse(scene, function (gltf) {
+    exporter.parse(mesh, function (gltf) {
         // 处理导出的GLTF数据
         console.log(gltf);
         const output = JSON.stringify(gltf, null, 2);
@@ -99,7 +109,13 @@ export function loadGLTF(url) {
         url,
         function (gltf) {
             // 添加到场景中
-            // scene.add(gltf.scene);
+            gltf.scene.traverse((object) => {
+                if (object.userData.isHidden) {
+                    console.log('888888');
+                    object.visible = false;
+                }
+            });
+
             console.log(gltf.scene);
             scene.add(gltf.scene)
         },
