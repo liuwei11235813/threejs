@@ -6,8 +6,63 @@
     <title>Loadddddddd</title>
 </head>
 <body>
-    
+    <button id="btn">save</button>
+    <input type="file" id="fileInput" >
+
+
+    <button id="btn1">saveGLTF</button>
+    <input type="file" id="fileGLTF" >
+
 </body>
 <script type="module" src="/load.js"></script>
+<script type="module">
+import { createSceneFromJSON, saveScene, saveSceneGLTF, loadGLTF } from './load.js'
+btn.addEventListener('click', function name(params) {
+    saveScene()
+})
 
+btn1.addEventListener('click', function name(params) {
+    saveSceneGLTF()
+})
+
+fileInput.addEventListener('change', function(event) {
+    console.log(1111);
+    // 获取选中的文件
+    const file = event.target.files[0];
+
+    if (file) {
+        // 创建一个FileReader来读取文件
+        const reader = new FileReader();
+
+        // 当文件读取完成后触发
+        reader.onload = function(e) {
+            const contents = e.target.result;
+            // 解析JSON并创建场景
+            createSceneFromJSON(contents);
+        };
+
+        // 读取文件
+        reader.readAsText(file);
+    }
+});
+
+fileGLTF.addEventListener('change', function(event) {
+    console.log(222);
+    // 获取选中的文件
+    const file = event.target.files[0];
+
+    if (file) {
+        // 创建一个FileReader来读取文件
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        // 当文件读取完成后触发
+        reader.onload = function(e) {
+            const url = reader.result;
+            // 解析JSON并创建场景
+            loadGLTF(url);
+        };
+    }
+});
+
+</script>
 </html>

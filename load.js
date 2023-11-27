@@ -2,6 +2,8 @@ import * as THREE  from 'three'
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import * as math from 'mathjs'
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // 创建一个场景
 var scene = new THREE.Scene();
@@ -34,13 +36,25 @@ const mesh = new THREE.Mesh(
 scene.add(mesh)
 
 
-const edgesGeometry = new THREE.EdgesGeometry(mesh.geometry)
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-const edges = new THREE.LineSegments(edgesGeometry, lineMaterial);
-mesh.add(edges)
+// const edgesGeometry = new THREE.EdgesGeometry(mesh.geometry)
+// const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+// const edges = new THREE.LineSegments(edgesGeometry, lineMaterial);
+// mesh.add(edges)
 
-setTimeout(function () {
-    const data = mesh.toJSON()
+
+
+
+
+
+
+
+
+
+
+
+
+export function saveScene() {
+    const data = scene.toJSON()
 
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -51,39 +65,68 @@ setTimeout(function () {
     a.download = 'output.json';
     a.click();
     URL.revokeObjectURL(url);
-},2000)
-
-
-
-
-
-
-export function saveScene() {
-    
-    const sceneJSON = JSON.stringify(scene.toJSON());
-    localStorage.setItem('myScene', sceneJSON);
-}
-
-export function loadScene() {
-    // 从 localStorage 读取场景 JSON 字符串
-    const sceneJSON = localStorage.getItem('myScene');
-
-    if (sceneJSON) {
-        // 解析 JSON 字符串
-        const json = JSON.parse(sceneJSON);
-
-        // 使用 ObjectLoader
-        const loader = new THREE.ObjectLoader();
-        const loadedScene = loader.parse(json);
-
-        return loadedScene
-    }
 }
 
 
+// 可选：自定义导出选项
+const options = {
+    // 例如，包含或排除特定对象
+};
+export function saveSceneGLTF() {
+    const exporter = new GLTFExporter();
+
+    // 导出场景或对象
+    exporter.parse(scene, function (gltf) {
+        // 处理导出的GLTF数据
+        console.log(gltf);
+        const output = JSON.stringify(gltf, null, 2);
+        downloadJSON(output, 'scene.gltf');
+    }, options);
+}
+// // 助手函数来下载JSON文件
+function downloadJSON(content, fileName) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const anchor = document.createElement('a');
+    anchor.download = fileName;
+    anchor.href = window.URL.createObjectURL(blob);
+    anchor.click();
+    window.URL.revokeObjectURL(anchor.href);
+}
+
+export function loadGLTF(url) {
+    const loader = new GLTFLoader();
+    loader.load(
+        url,
+        function (gltf) {
+            // 添加到场景中
+            // scene.add(gltf.scene);
+            console.log(gltf.scene);
+            scene.add(gltf.scene)
+        },
+        undefined,
+        function (error) {
+            console.error('An error happened:', error);
+        }
+    );
+}
 
 
 
+
+export function createSceneFromJSON(jsonString) {
+    const json = JSON.parse(jsonString);
+
+    const loader = new THREE.ObjectLoader();
+
+    const newScene = loader.parse(json, function (object) {
+        if (object instanceof THREE.LineSegments) {
+        }
+    });
+    console.log('createSceneFromJSON',newScene);
+
+    scene = newScene
+
+}
 
 
 
