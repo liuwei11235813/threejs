@@ -34,28 +34,26 @@ const mesh = new THREE.Mesh(
 )
 
 // scene.add(mesh)
-mesh.visible= false
+mesh.visible= true
 
 
-const mesh1 = new THREE.Mesh(
-    new THREE.BoxGeometry(.5,.5,.5),
-    new THREE.MeshBasicMaterial({color: 0xffff00})
-)
-mesh.add(mesh1)
-mesh1.userData.isHidden  = true
-mesh1.visible = false
-
-
-// const edgesGeometry = new THREE.EdgesGeometry(mesh.geometry)
-// const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-// const edges = new THREE.LineSegments(edgesGeometry, lineMaterial);
-// mesh.add(edges)
+const edgesGeometry = new THREE.EdgesGeometry(mesh.geometry)
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+const edges = new THREE.LineSegments(edgesGeometry, lineMaterial);
+console.log(edges);
+mesh.add(edges)
 
 
 
 
 
 
+const points = [new THREE.Vector3(1,2,0), new THREE.Vector3(2,3,0)]
+const lsGeo = new THREE.BufferGeometry().setFromPoints(points)
+const materialss = new THREE.LineBasicMaterial({ color: 0x0000ff });
+const lineSegments = new THREE.LineSegments(lsGeo, materialss);
+
+console.log('lineSegments', lineSegments);
 
 
 
@@ -64,6 +62,15 @@ mesh1.visible = false
 
 
 export function saveScene() {
+    scene.traverse(function (child) {
+        console.log(child);
+        if (child.geometry&&child.geometry.type == "EdgesGeometry") {
+            child.geometry.type = "BufferGeometry"
+            delete child.geometry.parameters
+            
+        }
+    })
+
     const data = scene.toJSON()
 
     const jsonString = JSON.stringify(data, null, 2);
@@ -75,6 +82,22 @@ export function saveScene() {
     a.download = 'output.json';
     a.click();
     URL.revokeObjectURL(url);
+}
+
+export function createSceneFromJSON(jsonString) {
+    const json = JSON.parse(jsonString);
+
+    const loader = new THREE.ObjectLoader();
+
+    const newScene = loader.parse(json, function (object) {
+        console.log(object);
+        if (object instanceof THREE.LineSegments) {
+        }
+    });
+    console.log('createSceneFromJSON',newScene);
+
+    scene = newScene
+
 }
 
 
@@ -129,20 +152,7 @@ export function loadGLTF(url) {
 
 
 
-export function createSceneFromJSON(jsonString) {
-    const json = JSON.parse(jsonString);
 
-    const loader = new THREE.ObjectLoader();
-
-    const newScene = loader.parse(json, function (object) {
-        if (object instanceof THREE.LineSegments) {
-        }
-    });
-    console.log('createSceneFromJSON',newScene);
-
-    scene = newScene
-
-}
 
 
 
