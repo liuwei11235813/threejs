@@ -30,9 +30,9 @@ controls.update()
 const materials = [
     new THREE.MeshBasicMaterial({ color: 0xff0000 }), // 红色
     new THREE.MeshBasicMaterial({ color: 0x00ff00 }), // 绿色
-    new THREE.MeshBasicMaterial({ color: 0x0000ff}), // 蓝色
+    new THREE.MeshBasicMaterial({ color: 0x0000ff, side:THREE.BackSide}), // 蓝色
     new THREE.MeshBasicMaterial({ color: 0xffff00 }), // 黄色
-    new THREE.MeshBasicMaterial({ color: 0x00ffff }), // 青色
+    new THREE.MeshBasicMaterial({ color: 0x00ffff, side:THREE.BackSide}), // 青色
     new THREE.MeshBasicMaterial({ color: 0xff00ff })  // 紫色
 ];
 
@@ -41,7 +41,7 @@ const materials1 = [
     new THREE.MeshBasicMaterial({ color: 0x00ff00 }), // 绿色
     new THREE.MeshBasicMaterial({ color: 0x0000ff}), // 蓝色
     new THREE.MeshBasicMaterial({ color: 0xffff00 }), // 黄色
-    new THREE.MeshBasicMaterial({ color: 0x00ffff }), // 青色
+    new THREE.MeshBasicMaterial({ color: 0x00ffff, side:THREE.BackSide }), // 青色
     new THREE.MeshBasicMaterial({ color: 0xff00ff })  // 紫色
 ];
 
@@ -54,7 +54,7 @@ box.translateY(1)
 
 const boxfb = box.clone()
 boxfb.geometry = new THREE.BoxGeometry(2,2,1)
-boxfb.material = materials1
+
 
 const box1 = boxfb.clone()
 box1.translateZ(1.5)

@@ -118,6 +118,34 @@ scene.add( mesh );
 
 
 
+const array = [new THREE.Vector3(1789.0002441406252, 0, -1371.9996943086546)]
+const p = new THREE.Vector3(1789.0002441406252, 0, -1371.9996943086546)
+
+
+
+let index = -1;
+for (let i = 0; i < array.length; i++) {
+    if (array[i].equals(p)) {
+        index = i;
+        break;
+    }
+}
+
+
+function pointIdex(array, p) {
+    let index = -1;
+    for (let i = 0; i < array.length; i++) {
+        if (array[i].equals(p)) {
+            index = i;
+            break;
+        }
+    }
+    return index
+}
+console.log('pppppp',pointIdex(array, p));
+
+
+
 // 创建一个渲染循环
 function animate() {
     requestAnimationFrame(animate);
