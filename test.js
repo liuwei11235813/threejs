@@ -146,6 +146,31 @@ console.log('pppppp',pointIdex(array, p));
 
 
 
+
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(10,1,1),
+    new THREE.MeshBasicMaterial({color: 0xff0000})
+)
+scene.add(cube)
+
+const cube1 = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshBasicMaterial({color: 0xff0000})
+)
+cube1.name = 'cube'
+const cube2 = cube1.clone()
+const cube3 = cube1.clone()
+
+cube1.add(cube2, cube3)
+
+const a = cube1.getObjectsByProperty('name', 'cube')
+console.log(a,1111);
+
+
+
+
+
+
 // 创建一个渲染循环
 function animate() {
     requestAnimationFrame(animate);
