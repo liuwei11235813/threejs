@@ -200,8 +200,6 @@ export function route() {
 
 
 
-
-
 // 创建一个渲染循环
 function animate() {
     requestAnimationFrame(animate);

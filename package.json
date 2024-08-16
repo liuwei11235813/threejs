@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "dxf-parser": "^1.1.2",
     "mathjs": "^11.11.2",
     "three": "^0.154.0",
     "three-bvh-csg": "^0.0.13",
