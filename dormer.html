@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式椭圆弧生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #e5e7eb;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(17, 24, 39, 0.8);
+            border: 1px solid rgba(55, 65, 81, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        #info-box {
+            margin-top: 16px;
+            padding: 12px;
+            background-color: rgba(31, 41, 55, 0.7);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .highlight {
+            color: #34d399; /* emerald-400 */
+            font-weight: bold;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <div id="ui-panel">
+        <h1 class="text-xl font-bold mb-4">椭圆弧控制器</h1>
+        <div>
+            <label for="r-slider" id="r-label">向上延伸距离 (r): 5.0</label>
+            <input type="range" id="r-slider" min="0.1" max="10" step="0.1" value="5">
+        </div>
+        <div id="info-box">
+            拖动滑块查看变化
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- 常量定义 ---
+        const HORIZONTAL_RADIUS = 5; // 水平线段长度的一半 (a)
+        const SEGMENT_COLOR = 0x4ade80; // green-400
+        const ARC_COLOR = 0x60a5fa;     // blue-400
+        const EXTENSION_COLOR = 0xf87171; // red-400
+        const POINT_COLOR = 0xfbbf24;   // amber-400
+
+        // --- 核心变量 ---
+        let scene, camera, renderer, controls;
+        let arcGroup = new THREE.Group(); // 用于存放所有可变几何体，方便更新
+
+        // --- UI 元素 ---
+        const rSlider = document.getElementById('r-slider');
+        const rLabel = document.getElementById('r-label');
+        const infoBox = document.getElementById('info-box');
+
+        // --- 初始化函数 ---
+        function init() {
+            // 场景
+            scene = new THREE.Scene();
+            scene.add(arcGroup);
+
+            // 相机
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 12);
+            camera.lookAt(scene.position);
+
+            // 渲染器
+            const container = document.getElementById('container');
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // 光照
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            // 坐标轴辅助
+            const axesHelper = new THREE.AxesHelper(10);
+            scene.add(axesHelper);
+
+            // 控制器
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 5;
+            controls.maxDistance = 50;
+
+            // 初始绘制
+            updateScene();
+
+            // 事件监听
+            rSlider.addEventListener('input', onSliderChange);
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        // --- 更新场景函数 ---
+        function updateScene() {
+            // 清理旧的几何体
+            while(arcGroup.children.length > 0){ 
+                const object = arcGroup.children[0];
+                arcGroup.remove(object);
+                if (object.geometry) object.geometry.dispose();
+                if (object.material) {
+                    if (Array.isArray(object.material)) {
+                        object.material.forEach(m => m.dispose());
+                    } else {
+                        object.material.dispose();
+                    }
+                }
+            }
+
+            const r = parseFloat(rSlider.value);
+
+            // 1. 创建水平线段
+            const linePoints = [
+                new THREE.Vector3(-HORIZONTAL_RADIUS, 0, 0),
+                new THREE.Vector3(HORIZONTAL_RADIUS, 0, 0)
+            ];
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+            const lineMaterial = new THREE.LineBasicMaterial({ color: SEGMENT_COLOR, linewidth: 2 });
+            const horizontalLine = new THREE.Line(lineGeometry, lineMaterial);
+            arcGroup.add(horizontalLine);
+
+            // 2. 创建向上延伸的线段
+            const extensionPoints = [
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, r, 0)
+            ];
+            const extensionGeometry = new THREE.BufferGeometry().setFromPoints(extensionPoints);
+            const extensionMaterial = new THREE.LineBasicMaterial({ color: EXTENSION_COLOR, linewidth: 2 });
+            const extensionLine = new THREE.Line(extensionGeometry, extensionMaterial);
+            arcGroup.add(extensionLine);
+
+            // 3. 创建椭圆弧
+            const curve = new THREE.EllipseCurve(
+                0,  0,                    // ax, aY (中心点)
+                HORIZONTAL_RADIUS, r,     // xRadius, yRadius (水平和垂直半径)
+                0,  Math.PI,              // aStartAngle, aEndAngle (从0到PI，上半部分)
+                false,                    // aClockwise
+                0                         // aRotation
+            );
+            const arcPoints = curve.getPoints(100); // 点数越多，弧线越平滑
+            const arcGeometry = new THREE.BufferGeometry().setFromPoints(arcPoints);
+            const arcMaterial = new THREE.LineBasicMaterial({ color: ARC_COLOR, linewidth: 3 });
+            const ellipseArc = new THREE.Line(arcGeometry, arcMaterial);
+            arcGroup.add(ellipseArc);
+
+            // 4. 创建三个关键点
+            const pointGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const pointMaterial = new THREE.MeshStandardMaterial({ color: POINT_COLOR });
+            
+            const p1 = new THREE.Mesh(pointGeometry, pointMaterial);
+            p1.position.set(-HORIZONTAL_RADIUS, 0, 0);
+
+            const p2 = new THREE.Mesh(pointGeometry, pointMaterial);
+            p2.position.set(HORIZONTAL_RADIUS, 0, 0);
+
+            const p3 = new THREE.Mesh(pointGeometry, pointMaterial);
+            p3.position.set(0, r, 0);
+
+            arcGroup.add(p1, p2, p3);
+
+            // 更新UI信息
+            rLabel.innerText = `向上延伸距离 (r): ${r.toFixed(1)}`;
+            if (Math.abs(r - HORIZONTAL_RADIUS) < 0.01) {
+                infoBox.innerHTML = `当前 r ≈ a (${HORIZONTAL_RADIUS.toFixed(1)}), 形成 <span class="highlight">半圆形</span>`;
+            } else if (r < HORIZONTAL_RADIUS) {
+                infoBox.innerHTML = `r < a, 形成一个 <span class="highlight">扁平的</span> 椭圆弧`;
+            } else {
+                infoBox.innerHTML = `r > a, 形成一个 <span class="highlight">瘦高的</span> 椭圆弧`;
+            }
+        }
+
+        // --- 事件处理函数 ---
+        function onSliderChange() {
+            updateScene();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- 动画循环 ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // --- 启动 ---
+        init();
+        animate();
+    </script>
+</body>
+</html>
